@@ -6,7 +6,7 @@ def sleep_ecu(current_state):
     if current_state == "AWAKE":
         return "SLEEP"
     else:
-        return current_state
+        return current_state 
 
 
 def wake_ecu(current_state):
