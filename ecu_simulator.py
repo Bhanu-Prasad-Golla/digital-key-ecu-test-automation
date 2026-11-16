@@ -14,3 +14,6 @@ def wake_ecu(current_state):
         return "AWAKE"
     else:
         return current_state
+
+def power_off_ecu(current_state):
+    return "OFF"

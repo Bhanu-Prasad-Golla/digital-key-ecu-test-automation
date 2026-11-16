@@ -1,5 +1,5 @@
 import sys
-from ecu_simulator import start_ecu, sleep_ecu, wake_ecu
+from ecu_simulator import start_ecu, sleep_ecu, wake_ecu, power_off_ecu
 
 passed = 0
 failed = 0
@@ -93,6 +93,42 @@ else:
     print("FAIL: Repeated wakeup changed ECU state")
     failed += 1
 
+# Test 9: Power off an awake ECU
+actual_state = power_off_ecu("AWAKE")
+
+if actual_state == "OFF":
+    print("PASS: Awake ECU powers off")
+    passed += 1
+else:
+    print("FAIL: Awake ECU did not power off")
+    failed += 1
+
+# Test 10: Simulated power cycle
+ecu_state = start_ecu()
+startup_state = ecu_state
+
+ecu_state = power_off_ecu(ecu_state)
+off_state = ecu_state
+
+ecu_state = start_ecu()
+
+if startup_state == "AWAKE" and off_state == "OFF" and ecu_state == "AWAKE":
+    print("PASS: ECU restarts after power off")
+    passed += 1
+else:
+    print("FAIL: ECU power-cycle sequence")
+    failed += 1
+
+# Test 11: Power off a sleeping ECU
+actual_state = power_off_ecu("SLEEP")
+
+if actual_state == "OFF":
+    print("PASS: Sleeping ECU powers off")
+    passed += 1
+else:
+    print("FAIL: Sleeping ECU did not power off")
+    failed += 1
+
 # Summary
 total = passed + failed
 
@@ -100,6 +136,15 @@ print("\n--- TEST SUMMARY ---")
 print("Total tests:", total)
 print("Passed:", passed)
 print("Failed:", failed)
+
+# Save the summary to a report file
+with open("test_report.txt", "w") as report:
+    report.write("--- ECU TEST SUMMARY ---\n")
+    report.write(f"Total tests: {total}\n")
+    report.write(f"Passed: {passed}\n")
+    report.write(f"Failed: {failed}\n")
+
+print("Report saved to test_report.txt")
 
 if failed > 0:
     sys.exit(1)
