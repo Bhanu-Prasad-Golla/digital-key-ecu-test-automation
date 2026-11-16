@@ -54,6 +54,25 @@ else:
     print("FAIL: Wakeup command changed OFF ECU")
     failed += 1
 
+# Test 6: Complete startup, sleep, and wakeup sequence
+ecu_state = start_ecu()
+print("Sequence - startup:", ecu_state)
+
+ecu_state = sleep_ecu(ecu_state)
+print("Sequence - sleep:", ecu_state)
+
+sleep_state = ecu_state
+
+ecu_state = wake_ecu(ecu_state)
+print("Sequence - wakeup:", ecu_state)
+
+if sleep_state == "SLEEP" and ecu_state == "AWAKE":
+    print("PASS: Complete sleep and wakeup sequence")
+    passed += 1
+else:
+    print("FAIL: Complete sleep and wakeup sequence")
+    failed += 1
+
 # Summary
 total = passed + failed
 
