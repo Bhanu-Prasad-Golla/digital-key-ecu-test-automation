@@ -29,3 +29,12 @@ def process_command(current_state, command):
         return power_off_ecu(current_state)
     else:
         return current_state
+
+def connect_ble(ecu_state):
+    if ecu_state == "AWAKE":
+        return "CONNECTED"
+    else:
+        return "DISCONNECTED"
+
+def disconnect_ble(ble_status):
+    return "DISCONNECTED"

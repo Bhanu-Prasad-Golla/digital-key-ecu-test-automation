@@ -1,6 +1,7 @@
 import sys
 from ecu_simulator import start_ecu, sleep_ecu, wake_ecu, power_off_ecu
 from ecu_simulator import process_command
+from ecu_simulator import connect_ble, disconnect_ble
 def check_result(test_name, actual, expected):
     if actual == expected:
         print(f"PASS: {test_name}")
@@ -214,6 +215,73 @@ if repeat_passed:
     passed += 1
 else:
     print("FAIL: Repeated command cycles")
+    failed += 1
+
+# Test 16: Simulated BLE connection while awake
+ble_status = connect_ble("AWAKE")
+
+if check_result("BLE connection while awake", ble_status, "CONNECTED"):
+    passed += 1
+else:
+    failed += 1
+
+# Test 17: BLE connection attempt while sleeping
+ble_status = connect_ble("SLEEP")
+
+if check_result("BLE blocked while sleeping", ble_status, "DISCONNECTED"):
+    passed += 1
+else:
+    failed += 1
+
+
+# Test 18: BLE connection attempt while OFF
+ble_status = connect_ble("OFF")
+
+if check_result("BLE blocked while OFF", ble_status, "DISCONNECTED"):
+    passed += 1
+else:
+    failed += 1
+
+# Test 19: Connect and then disconnect BLE
+ble_status = connect_ble("AWAKE")
+connected_status = ble_status
+
+ble_status = disconnect_ble(ble_status)
+
+if connected_status == "CONNECTED" and ble_status == "DISCONNECTED":
+    print("PASS: BLE connects and disconnects")
+    passed += 1
+else:
+    print(
+        f"FAIL: BLE connection sequence | "
+        f"After connect: {connected_status} | "
+        f"After disconnect: {ble_status}"
+    )
+    failed += 1
+
+# Test 20: BLE reconnects after disconnection
+ble_status = connect_ble("AWAKE")
+first_connection = ble_status
+
+ble_status = disconnect_ble(ble_status)
+disconnected_status = ble_status
+
+ble_status = connect_ble("AWAKE")
+
+if (
+    first_connection == "CONNECTED"
+    and disconnected_status == "DISCONNECTED"
+    and ble_status == "CONNECTED"
+):
+    print("PASS: BLE reconnects after disconnection")
+    passed += 1
+else:
+    print(
+        f"FAIL: BLE reconnection | "
+        f"First connection: {first_connection} | "
+        f"After disconnect: {disconnected_status} | "
+        f"After reconnect: {ble_status}"
+    )
     failed += 1
 
 # Summary
