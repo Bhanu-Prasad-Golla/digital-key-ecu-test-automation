@@ -1,6 +1,16 @@
 import sys
 from ecu_simulator import start_ecu, sleep_ecu, wake_ecu, power_off_ecu
-
+from ecu_simulator import process_command
+def check_result(test_name, actual, expected):
+    if actual == expected:
+        print(f"PASS: {test_name}")
+        return True
+    else:
+        print(
+            f"FAIL: {test_name} | "
+            f"Expected: {expected} | Actual: {actual}"
+        )
+        return False
 passed = 0
 failed = 0
 
@@ -17,11 +27,9 @@ else:
 # Test 2: Sleep from AWAKE
 actual_state = sleep_ecu("AWAKE")
 
-if actual_state == "SLEEP":
-    print("PASS: Awake ECU enters sleep")
+if check_result("Sleep from AWAKE", actual_state, "SLEEP"):
     passed += 1
 else:
-    print("FAIL: Awake ECU did not enter sleep")
     failed += 1
 
 # Test 3: Wakeup from SLEEP
@@ -127,6 +135,85 @@ if actual_state == "OFF":
     passed += 1
 else:
     print("FAIL: Sleeping ECU did not power off")
+    failed += 1
+
+# Test 12: Process a sleep command
+actual_state = process_command("AWAKE", "SLEEP")
+
+if actual_state == "SLEEP":
+    print("PASS: Sleep command processed")
+    passed += 1
+else:
+    print("FAIL: Sleep command processing")
+    failed += 1
+
+
+# Test 13: Unknown command keeps state unchanged
+actual_state = process_command("AWAKE", "INVALID")
+
+if actual_state == "AWAKE":
+    print("PASS: Unknown command keeps state unchanged")
+    passed += 1
+else:
+    print("FAIL: Unknown command changed state")
+    failed += 1
+
+# Test 14: Command sequence
+commands = ["START", "SLEEP", "WAKE", "OFF"]
+expected_states = ["AWAKE", "SLEEP", "AWAKE", "OFF"]
+
+ecu_state = "OFF"
+sequence_passed = True
+
+for index in range(len(commands)):
+    command = commands[index]
+    expected_state = expected_states[index]
+
+    ecu_state = process_command(ecu_state, command)
+
+    print(
+        f"Command: {command} | "
+        f"Expected: {expected_state} | Actual: {ecu_state}"
+    )
+
+    if ecu_state != expected_state:
+        sequence_passed = False
+
+if sequence_passed:
+    print("PASS: Command sequence")
+    passed += 1
+else:
+    print("FAIL: Command sequence")
+    failed += 1
+
+# Test 15: Repeat the command sequence five times
+commands = ["START", "SLEEP", "WAKE", "OFF"]
+expected_states = ["AWAKE", "SLEEP", "AWAKE", "OFF"]
+
+ecu_state = "OFF"
+repeat_passed = True
+
+for cycle in range(1, 6):
+    print(f"Cycle {cycle}")
+
+    for index in range(len(commands)):
+        command = commands[index]
+        expected_state = expected_states[index]
+
+        ecu_state = process_command(ecu_state, command)
+
+        if ecu_state != expected_state:
+            print(
+                f"FAIL: Cycle {cycle}, command {command}, "
+                f"expected {expected_state}, actual {ecu_state}"
+            )
+            repeat_passed = False
+
+if repeat_passed:
+    print("PASS: All five command cycles")
+    passed += 1
+else:
+    print("FAIL: Repeated command cycles")
     failed += 1
 
 # Summary

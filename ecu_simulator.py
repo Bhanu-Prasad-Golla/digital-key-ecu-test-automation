@@ -17,3 +17,15 @@ def wake_ecu(current_state):
 
 def power_off_ecu(current_state):
     return "OFF"
+
+def process_command(current_state, command):
+    if command == "START":
+        return start_ecu()
+    elif command == "SLEEP":
+        return sleep_ecu(current_state)
+    elif command == "WAKE":
+        return wake_ecu(current_state)
+    elif command == "OFF":
+        return power_off_ecu(current_state)
+    else:
+        return current_state
