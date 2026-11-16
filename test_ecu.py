@@ -72,6 +72,26 @@ if sleep_state == "SLEEP" and ecu_state == "AWAKE":
 else:
     print("FAIL: Complete sleep and wakeup sequence")
     failed += 1
+# Test 7: Sleep command while already sleeping
+actual_state = sleep_ecu("SLEEP")
+
+if actual_state == "SLEEP":
+    print("PASS: Repeated sleep keeps ECU sleeping")
+    passed += 1
+else:
+    print("FAIL: Repeated sleep changed ECU state")
+    failed += 1
+
+
+# Test 8: Wakeup command while already awake
+actual_state = wake_ecu("AWAKE")
+
+if actual_state == "AWAKE":
+    print("PASS: Repeated wakeup keeps ECU awake")
+    passed += 1
+else:
+    print("FAIL: Repeated wakeup changed ECU state")
+    failed += 1
 
 # Summary
 total = passed + failed
